@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: nvim, version: v0.7.0 }
+          - { os: ubuntu-latest, target: nvim, version: nightly }
+          - { os: macos-latest, target: nvim, version: v0.7.0 }
+          - { os: macos-latest, target: nvim, version: nightly }
+          - { os: ubuntu-latest, target: lua, version: lua 5.1 }
+          - { os: ubuntu-latest, target: lua, version: lua 5.2 }
+          - { os: ubuntu-latest, target: lua, version: lua 5.3 }
+          - { os: ubuntu-latest, target: lua, version: lua 5.4 }
+          - { os: ubuntu-latest, target: lua, version: luajit 2.1.0-beta3 }
+          - { os: macos-latest, target: lua, version: lua 5.1 }
+          - { os: macos-latest, target: lua, version: lua 5.2 }
+          - { os: macos-latest, target: lua, version: lua 5.3 }
+          - { os: macos-latest, target: lua, version: lua 5.4 }
+          - { os: macos-latest, target: lua, version: luajit 2.1.0-beta3 }
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - if: matrix.target == 'nvim' && matrix.os == 'ubuntu-latest'
+        name: Install Neovim on Ubuntu
+        run: |
+          cd
+          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-linux64.tar.gz
+          tar xzf nvim-linux64.tar.gz
+          echo "${PWD}/nvim-linux64/bin" >> $GITHUB_PATH
+          export PATH="${PWD}/nvim-linux64/bin:${PATH}"
+          nvim -v
+      - if: matrix.target == 'nvim' && matrix.os == 'macos-latest'
+        name: Install Neovim on Macos
+        run: |
+          cd
+          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-macos.tar.gz
+          tar xzf nvim-macos.tar.gz
+          echo "${PWD}/nvim-osx64/bin" >> $GITHUB_PATH
+          export PATH="${PWD}/nvim-osx64/bin:${PATH}"
+          nvim -v
+
+      - name: Run Test
+        run: |
+          if [[ ${{ matrix.target }} == lua ]]; then
+            export LUA_VERSION="${{ matrix.version }}"
+          fi
+          make test_${{ matrix.target }}

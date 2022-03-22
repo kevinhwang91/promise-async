@@ -1,0 +1,17 @@
+{
+	"$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+	"diagnostics.globals": [
+		"vim",
+		"jit",
+		"it",
+		"describe",
+		"before_each",
+		"after_each",
+		"spy",
+		"setup",
+		"teardown",
+		"done",
+		"wait"
+	],
+	"runtime.version": "LuaJIT"
+}
