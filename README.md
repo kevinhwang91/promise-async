@@ -23,11 +23,11 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 
 #### demo.lua
 
-<https://github.com/kevinhwang91/promise-async/blob/fb97aa33dc4c9922caf3afc7fa7a52174e012486/examples/demo.lua#L17-L82>
+<https://github.com/kevinhwang91/promise-async/blob/8177d6e6ab8dae4ca5f26caf3bdc23f632595d40/examples/demo.lua#L17-L82>
 
 #### demo.js
 
-<https://github.com/kevinhwang91/promise-async/blob/fb97aa33dc4c9922caf3afc7fa7a52174e012486/examples/demo.js#L1-L58>
+<https://github.com/kevinhwang91/promise-async/blob/8177d6e6ab8dae4ca5f26caf3bdc23f632595d40/examples/demo.js#L1-L58>
 
 ## Quickstart
 
@@ -37,7 +37,7 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 - [Luv](https://github.com/luvit/luv)
 
 > Luv is a default EventLoop for promise-async. It doesn't mean promise-async must require it. In
-> fact, promise-async require a general EventLoop framework which Luv like.
+> fact, promise-async require a general EventLoop module which Luv like.
 
 ### Installation
 
@@ -68,7 +68,7 @@ use_rocks {'promise-async'}
 
 ## Documentation
 
-promise-async's API is based on [MDN-Promise][promise] from JavaScript.
+promise-async's API is based on [MDN-Promise][promise].
 [typings/promise.lua](typings/promise.lua) is the typings with documentation of Promise class.
 
 Summary up the API different from JavaScript.
