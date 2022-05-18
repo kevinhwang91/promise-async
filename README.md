@@ -23,9 +23,11 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 
 #### demo.lua
 
+<https://github.com/kevinhwang91/promise-async/blob/fb97aa33dc4c9922caf3afc7fa7a52174e012486/examples/demo.lua#L17-L82>
 
 #### demo.js
 
+<https://github.com/kevinhwang91/promise-async/blob/fb97aa33dc4c9922caf3afc7fa7a52174e012486/examples/demo.js#L1-L58>
 
 ## Quickstart
 
