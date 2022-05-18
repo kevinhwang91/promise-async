@@ -15,7 +15,7 @@ async function bomb(ms) {
 }
 
 async function race() {
-    return await Promise.race([
+    return Promise.race([
         defuse(500 + Math.ceil(Math.random() * 500)),
         bomb(800 + Math.ceil(Math.random() * 200)),
     ])

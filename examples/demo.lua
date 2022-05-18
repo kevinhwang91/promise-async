@@ -33,10 +33,10 @@ end
 
 local function race()
     return async(function()
-        return await(promise.race({
+        return promise.race({
             defuse(math.random(500, 1000)),
             bomb(math.random(800, 1000))
-        }))
+        })
     end)
 end
 
