@@ -1,13 +1,12 @@
 SHELL := /bin/bash
 DEPS ?= build
 
-NVIM_BIN ?= $(shell command -v nvim)
-ifdef NVIM_BIN
-NVIM_LUA_VERSION := $(shell $(NVIM_BIN) -v | grep -E '^Lua(JIT)?' | tr A-Z a-z)
-else
-NVIM_LUA_VERSION := luajit 2.1.0-beta3
-endif
+LUA_VERSION ?= luajit 2.1.0-beta3
+NVIM_BIN ?= nvim
+NVIM_LUA_VERSION := $(shell $(NVIM_BIN) -v 2>/dev/null | grep -E '^Lua(JIT)?' | tr A-Z a-z)
+ifdef NVIM_LUA_VERSION
 LUA_VERSION ?= $(NVIM_LUA_VERSION)
+endif
 LUA_NUMBER := $(word 2,$(LUA_VERSION))
 
 TARGET_DIR := $(DEPS)/$(LUA_NUMBER)
@@ -41,8 +40,8 @@ test_lua: $(BUSTED) $(LUV)
 	@$(HEREROCKS_ACTIVE) && eval $$(luarocks path) && \
 		lua spec/init.lua --helper=$(BUSTED_HELPER) $(BUSTED_ARGS)
 
+ifdef NVIM_LUA_VERSION
 test_nvim: $(BUSTED)
-ifeq ($(LUA_VERSION),$(NVIM_LUA_VERSION))
 	@echo Test with Neovim ......
 	@$(HEREROCKS_ACTIVE) && eval $$(luarocks path) && \
 		$(NVIM_BIN) --clean -n --headless -u spec/init.lua -- \
