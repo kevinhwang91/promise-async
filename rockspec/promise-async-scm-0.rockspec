@@ -1,8 +1,7 @@
----@diagnostic disable: lowercase-global
 package = 'promise-async'
-version = 'scm-1'
+version = 'scm-0'
 source = {
-   url = 'git://git@github.com/kevinhwang91/promise-async.git'
+   url = 'git+https://github.com/kevinhwang91/promise-async.git'
 }
 description = {
    summary = 'Promise & Async in Lua',
@@ -12,7 +11,7 @@ description = {
 }
 
 dependencies = {
-  'lua >= 5.1, < 5.4'
+  'lua >= 5.1, <= 5.4'
 }
 
 build = {
