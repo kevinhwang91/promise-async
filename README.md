@@ -8,6 +8,28 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 > A value returned by async function in JavaScript is actually a Promise Object. It's incomplete and
 > inflexible for using an async function wrapped by bare coroutine without Promise.
 
+- [Features](#features)
+- [Demonstrating](#demonstrating)
+  - [Script](#script)
+    - [demo.lua](#demo.lua)
+    - [demo.js](#demo.js)
+- [Quickstart](#quickstart)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+    - [As a plugin for Neovim platform](#as-a-plugin-for-neovim-platform)
+    - [As a library from Luarocks](#as-a-library-from-luarocks)
+- [Documentation](#documentation)
+  - [Summary](#summary)
+  - [async](#async)
+- [Development](#development)
+  - [Neovim tips](#neovim-tips)
+  - [Run tests](#run-tests)
+  - [Improve completion experience](#improve-completion-experience)
+  - [Customize EventLoop](#customize-eventloop)
+- [Credit](#credit)
+- [Feedback](#feedback)
+- [License](#license)
+
 ## Features
 
 - API is similar to JavaScript's
@@ -68,8 +90,10 @@ use_rocks {'promise-async'}
 
 ## Documentation
 
-promise-async's API is based on [MDN-Promise][promise].
-[typings/promise.lua](typings/promise.lua) is the typings with documentation of Promise class.
+promise-async's API is based on [MDN-Promise][promise]. [typings/promise.lua](typings/promise.lua)
+is the typings with documentation of Promise class.
+
+### Summary
 
 Summary up the API different from JavaScript.
 
@@ -92,12 +116,38 @@ Summary up the API different from JavaScript.
 
 <!-- markdownlint-enable MD013 -->
 
+### async
+
 The environment in `Async.sync` function have been injected some new functions for compatibility or
 enhancement:
 
 1. `await`: A reference of `Async.wait` function;
-2. `pcall`: Be compatible with LuaJIT;
-3. `xpcall`: Be compatible with LuaJIT;
+2. `pcall`: Be compatible with LuaJIT and handle error throws by Promise;
+3. `xpcall`: Be compatible with LuaJIT and handle error throws by Promise;
+
+`async` in JavaScript return Promise object only with single result, but may carry multiple results
+in Lua. The resolved result of Promise object return by `async` function will be packed into a table
+via `{...}`. However, the result handled by `await` will be unpacked and return multiple values.
+
+```lua
+local async = require('async')
+
+local function f()
+    return 1, 2, 3
+end
+
+-- packed into resolved result in Promise
+async(f):thenCall(function(value)
+    print(unpack(value)) -- output: 1 2 3
+end)
+-- results returned by `await`
+async(function()
+    local v1, v2, v3 = await(async(f))
+    print(v1, v2, v3) -- output: 1 2 3
+end)
+
+-- uv.run()
+```
 
 ## Development
 
