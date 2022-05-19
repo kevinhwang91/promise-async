@@ -37,7 +37,7 @@ describe('async await module.', function()
             assert.True(wait())
         end)
 
-        it('async return multiple values, which is packed into value in Promise', function()
+        it('async return multiple values, which are packed into resolved result in Promise', function()
             async(function()
                 return sentinel, sentinel2, sentinel3
             end):thenCall(function(value)
@@ -328,17 +328,18 @@ describe('async await module.', function()
         end)
 
         it('return multiple values', function()
-            local value
+            local value1, value2, value3, value4
             async(function()
-                value = compat.pack(await(async(function()
-                    return await(async(function()
-                        return sentinel, sentinel2, sentinel3
-                    end))
-                end)))
+                value1, value2, value3, value4 = await(async(function()
+                    return sentinel, sentinel2, sentinel3
+                end))
                 done()
             end)
             assert.True(wait())
-            assert.same({sentinel, sentinel2, sentinel3, n = 3}, value)
+            assert.equal(sentinel, value1)
+            assert.equal(sentinel2, value2)
+            assert.equal(sentinel3, value3)
+            assert.equal(nil, value4)
         end)
 
         it('should catch error from the deepest callee', function()
