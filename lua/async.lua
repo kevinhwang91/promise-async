@@ -80,32 +80,35 @@ function Async.sync(executor)
             return executor()
         end)
 
-        local function pack(status, ...)
-            return status, {...}, select('#', ...)
-        end
-
-        local function next(err, res)
-            local ok, t, n = pack(coroutine.resume(co, err, res))
-            if not ok then
-                local reason = t[1]
+        local function afterResume(status, ...)
+            if not status then
+                local reason = select(1, ...)
                 reject(reason)
                 return
             elseif coroutine.status(co) == 'dead' then
                 local value
+                local n = select('#', ...)
                 if n == 1 then
-                    value = t[1]
+                    value = select(1, ...)
                 elseif n > 1 then
-                    value = wrapPacked(t)
+                    value = wrapPacked({...})
                 end
                 resolve(value)
                 return
             end
-            local p = t[1]
-            p:thenCall(function(value)
-                next(false, value)
-            end, function(reason)
-                next(true, reason)
-            end)
+            local p = select(1, ...)
+            return p
+        end
+
+        local function next(err, res)
+            local p = afterResume(coroutine.resume(co, err, res))
+            if p then
+                p:thenCall(function(value)
+                    next(false, value)
+                end, function(reason)
+                    next(true, reason)
+                end)
+            end
         end
 
         next()
