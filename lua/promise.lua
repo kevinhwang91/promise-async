@@ -1,5 +1,4 @@
 local utils = require('promise-async.utils')
-local compat = require('promise-async.compat')
 
 local promiseId = {}
 
@@ -27,6 +26,7 @@ local Promise = setmetatable({_id = promiseId}, {
         return self.new(executor)
     end
 })
+Promise.__index = Promise
 
 local function loadEventLoop()
     local success, res = pcall(require, 'promise-async.loop')
@@ -99,7 +99,7 @@ local function handleQueue(promise)
     Promise.loop.nextTick(function()
         local state, result = promise.state, promise.result
         for _, q in ipairs(queue) do
-            local newPromise, onFulfilled, onRejected = compat.unpack(q)
+            local newPromise, onFulfilled, onRejected = q[1], q[2], q[3]
             local func
             if state == FULFILLED then
                 if utils.getCallable(onFulfilled) then
@@ -232,7 +232,6 @@ function Promise.new(executor)
     utils.assertType(executor, 'function')
     ---@type Promise
     local o = setmetatable({}, Promise)
-    Promise.__index = Promise
 
     o.state = PENDING
     o.result = nil
