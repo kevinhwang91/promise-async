@@ -112,7 +112,7 @@ Summary up the API different from JavaScript.
 | `Promise.any`: `Symbol.iterator` as iterator        | `Promise.any`: `pairs` as iterator              |
 | `Promise.race`: `Symbol.iterator` as iterator       | `Promise.race`: `pairs` as iterator             |
 | `async`: as keyword at the start of a function      | `Async`/`Async.sync`: as a surrounding function |
-| `await`: as keyword                                 | `async`/`Async.wait` as a function              |
+| `await`: as keyword                                 | `await`/`Async.wait` as a function              |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -136,17 +136,18 @@ local function f()
     return 1, 2, 3
 end
 
--- packed into resolved result in Promise
+-- multiple results are packed into resolved result in Promise
 async(f):thenCall(function(value)
     print(unpack(value)) -- output: 1 2 3
 end)
+
 -- results returned by `await`
 async(function()
     local v1, v2, v3 = await(async(f))
     print(v1, v2, v3) -- output: 1 2 3
 end)
 
--- uv.run()
+uv.run()
 ```
 
 ## Development

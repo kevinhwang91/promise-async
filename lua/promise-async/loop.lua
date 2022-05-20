@@ -76,7 +76,7 @@ else
     function EventLoop.callWrapper(fn)
         local ok, res = pcall(fn)
         if not ok then
-            -- luv can't handle object from __tostring()
+            -- luv can't handle object with __tostring filed
             error(tostring(res))
         end
     end
