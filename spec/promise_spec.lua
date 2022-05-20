@@ -185,6 +185,42 @@ describe('Extend Promise A+.', function()
             assert.True(wait())
             assert.spy(onFinally).was_called()
         end)
+
+        it('should throw first error', function()
+            local queue = {}
+            local p = promise.new(function(resolve)
+                setTimeout(function()
+                    resolve()
+                end, 30)
+            end)
+            p:finally(function()
+                table.insert(queue, sentinel)
+            end)
+            p:finally(function()
+                error(dummy)
+            end)
+            p:finally(function()
+                table.insert(queue, sentinel2)
+            end)
+            p:finally(function()
+                error(other)
+            end)
+            p:finally(function()
+                table.insert(queue, sentinel3)
+            end)
+            local err
+            local rawCallWrapper = promise.loop.callWrapper
+            promise.loop.callWrapper = function(fn)
+                local ok, res = pcall(fn)
+                if not ok then
+                    err = res
+                end
+            end
+            assert.False(wait(30))
+            promise.loop.callWrapper = rawCallWrapper
+            assert.same({sentinel, sentinel2, sentinel3}, queue)
+            assert.truthy(tostring(err):match('dummy'))
+        end)
     end)
 
     describe('Promise.all method.', function()

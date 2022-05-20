@@ -126,10 +126,24 @@ local function handleQueue(promise)
             end
         end
 
+        if #finallyQueue == 0 then
+            return
+        end
+        local firstError
         for _, onFinally in ipairs(finallyQueue) do
             if utils.getCallable(onFinally) then
-                pcall(onFinally)
+                local ok, res = pcall(onFinally)
+                if not firstError and not ok then
+                    firstError = res
+                end
             end
+        end
+        if firstError then
+            local errFactory = require('promise-async.error')
+            if not errFactory.isInstance(firstError) then
+                firstError = errFactory.new(firstError)
+            end
+            error(firstError)
         end
     end)
 end
