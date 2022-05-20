@@ -30,18 +30,20 @@ Promise.__index = Promise
 
 local function loadEventLoop()
     local success, res = pcall(require, 'promise-async.loop')
-    assert(success, 'Promise need a EventLoop, ' ..
+    assert(success, 'Promise need an EventLoop, ' ..
         'luv module or a customized EventLoop module is expected.')
     return res
 end
 
 Promise.loop = setmetatable({}, {
     __index = function(_, key)
-        Promise.loop = loadEventLoop()
-        return Promise.loop[key]
+        local loop = loadEventLoop()
+        rawset(Promise, 'loop', loop)
+        return loop[key]
     end,
     __newindex = function(_, key, value)
-        Promise.loop = loadEventLoop()
+        local loop = loadEventLoop()
+        rawset(Promise, 'loop', loop)
         Promise.loop[key] = value
     end
 })
