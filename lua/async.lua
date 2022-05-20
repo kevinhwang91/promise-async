@@ -21,11 +21,11 @@ local function wrapPacked(packed)
     return setmetatable(packed, Packed)
 end
 
-local function isPacked(o)
+local function hasPacked(o)
     return type(o) == 'table' and o._id == packedId
 end
 
-local function wrapFenv()
+local function apcall(f, ...)
     local function result(ok, ...)
         if ok then
             return true, ...
@@ -34,23 +34,23 @@ local function wrapFenv()
         return false, errFactory.isInstance(err) and err:peek() or err
     end
 
-    return {
-        await = Async.wait,
-        pcall = function(f, ...)
-            return result(compat.pcall(f, ...))
-        end,
-        xpcall = function(f, msgh, ...)
-            return compat.xpcall(f, function(err)
-                return msgh(errFactory.isInstance(err) and err:peek() or err)
-            end, ...)
-        end
-    }
+    return result(compat.pcall(f, ...))
 end
 
-local function getNewFenv(call)
-    return setmetatable(wrapFenv(), {
-        __index = compat.getfenv(call)
-    })
+local function axpcall(f, msgh, ...)
+    return compat.xpcall(f, function(err)
+        return msgh(errFactory.isInstance(err) and err:peek() or err)
+    end, ...)
+end
+
+local function injectENV(fn)
+    compat.setfenv(fn, setmetatable({
+        await = Async.wait,
+        pcall = apcall,
+        xpcall = axpcall
+    }, {
+        __index = compat.getfenv(fn)
+    }))
 end
 
 local function buildError(thread, level, err)
@@ -72,9 +72,9 @@ end
 ---@return Promise
 function Async.sync(executor)
     local typ = type(executor)
-    local isCallable, call = utils.getCallable(executor, typ)
+    local isCallable, fn = utils.getCallable(executor, typ)
     assert(isCallable, 'a callable table or function expected, got ' .. typ)
-    compat.setfenv(call, getNewFenv(call))
+    injectENV(fn)
     return promise.new(function(resolve, reject)
         local co = coroutine.create(typ == 'function' and executor or function()
             return executor()
@@ -124,7 +124,7 @@ function Async.wait(p)
     local err, res = coroutine.yield(p)
     if err then
         error(buildError(coroutine.running(), 2, res))
-    elseif isPacked(res) then
+    elseif hasPacked(res) then
         return compat.unpack(res)
     else
         return res
