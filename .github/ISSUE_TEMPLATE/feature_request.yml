@@ -1,11 +1,11 @@
 name: Feature request
-description: Request an enhancement for nvim-bqf
+description: Request an enhancement for promise-async
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        Before requesting: search [existing issues](https://github.com/kevinhwang91/nvim-bqf/labels/enhancement).
+        Before requesting: search [existing issues](https://github.com/kevinhwang91/promise-async/labels/enhancement).
   - type: textarea
     attributes:
       label: "Feature description"
