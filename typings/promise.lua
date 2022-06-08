@@ -3,7 +3,7 @@
 ---@alias PromiseExecutor fun(resolve: fun(value: any), reject: fun(reason?: any))
 
 ---@class Promise
----@field loop PromiseAsyncLoop
+---@field loop PromiseAsyncEventLoop
 ---@overload fun(executor: PromiseExecutor): Promise
 local Promise = {}
 

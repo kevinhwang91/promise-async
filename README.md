@@ -9,7 +9,7 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 > inflexible for using an async function wrapped by bare coroutine without Promise.
 
 - [Features](#features)
-- [Demonstrating](#demonstrating)
+- [Demonstration](#demonstration)
   - [Script](#script)
     - [demo.lua](#demo.lua)
     - [demo.js](#demo.js)
@@ -37,7 +37,7 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 - Support Lua 5.1-5.4 and LuaJIT with an EventLoop module
 - Support Neovim platform
 
-## Demonstrating
+## Demonstration
 
 <https://user-images.githubusercontent.com/17562139/169118448-9468909b-dbde-4dde-9308-ffe71abb24cd.mp4>
 
@@ -137,8 +137,8 @@ local function f()
 end
 
 -- multiple results are packed into resolved result in Promise
-async(f):thenCall(function(value)
-    print(unpack(value)) -- output: 1 2 3
+async(f):thenCall(function(v)
+    print(v[1], v[2], v[3]) -- output: 1 2 3
 end)
 
 -- results returned by `await`
