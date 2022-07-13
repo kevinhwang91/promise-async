@@ -1,6 +1,6 @@
 local utils = require('promise-async.utils')
 
-local promiseId = {}
+local promiseId = {'promise-async'}
 
 ---@diagnostic disable: undefined-doc-name
 ---@alias PromiseState

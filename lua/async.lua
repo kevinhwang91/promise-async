@@ -4,9 +4,11 @@ local compat = require('promise-async.compat')
 local errFactory = require('promise-async.error')
 local shortSrc = debug.getinfo(1, 'S').short_src
 
+local asyncId = {'promise-async'}
+
 ---@class Async
 ---@overload fun(executor: fun()): Promise
-local Async = setmetatable({}, {
+local Async = setmetatable({_id = asyncId}, {
     __call = function(self, executor)
         return self.sync(executor)
     end
