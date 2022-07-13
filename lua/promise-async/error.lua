@@ -44,7 +44,7 @@ function Error.format(thread, level, skipShortSrc)
     if dInfo then
         local name, shortSrc, currentline = dInfo.name, dInfo.short_src, dInfo.currentline
         if skipShortSrc == shortSrc then
-            return ''
+            return true, nil
         end
         local detail
         if not name or name == '' then
@@ -96,7 +96,7 @@ function Error:unshift(value)
     return #self.queue
 end
 
----@param value string
+---@param value? string
 function Error:push(value)
     if value then
         table.insert(self.queue, value)

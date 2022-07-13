@@ -13,5 +13,11 @@
 		"done",
 		"wait"
 	],
-	"runtime.version": "LuaJIT"
+	"diagnostics.disable": [
+		"param-type-mismatch",
+		"assign-type-mismatch"
+	],
+	"runtime.version": "LuaJIT",
+	"type.castNumberToInteger": true,
+	"type.weakUnionCheck": true
 }
