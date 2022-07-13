@@ -104,7 +104,7 @@ Summary up the API different from JavaScript.
 | `new Promise`                                       | `Promise.new`/`Promise`                         |
 | `Promise.then`                                      | `Promise:thenCall`, `then` is language keyword  |
 | `Promise.catch`                                     | `Promise:catch`                                 |
-| `Promise.finally`: return a new Promise             | `Promise:finally`: return itself                |
+| `Promise.finally`                                   | `Promise:finally`                               |
 | `Promise.resolve`                                   | `Promise.resolve`                               |
 | `Promise.reject`                                    | `Promise.reject`                                |
 | `Promise.all`: `Symbol.iterator` as iterator        | `Promise.all`: `pairs` as iterator              |

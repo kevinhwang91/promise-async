@@ -18,7 +18,6 @@ local REJECTED = 3
 ---@field result any
 ---@field queue table
 ---@field loop PromiseAsyncLoop
----@field finallyQueue function[]
 ---@field needHandleRejection? boolean
 ---@overload fun(executor: PromiseExecutor): Promise
 local Promise = setmetatable({_id = promiseId}, {
@@ -88,15 +87,13 @@ local resolvePromise, rejectPromise
 ---@param promise Promise
 local function handleQueue(promise)
     local queue = promise.queue
-    local finallyQueue = promise.finallyQueue
-    if #queue == 0 and #finallyQueue == 0 then
+    if #queue == 0 then
         return
     end
     if promise.needHandleRejection and #queue > 0 then
         promise.needHandleRejection = nil
     end
     promise.queue = {}
-    promise.finallyQueue = {}
 
     Promise.loop.nextTick(function()
         local state, result = promise.state, promise.result
@@ -124,26 +121,6 @@ local function handleQueue(promise)
                     rejectPromise(newPromise, res)
                 end
             end
-        end
-
-        if #finallyQueue == 0 then
-            return
-        end
-        local firstError
-        for _, onFinally in ipairs(finallyQueue) do
-            if utils.getCallable(onFinally) then
-                local ok, res = pcall(onFinally)
-                if not firstError and not ok then
-                    firstError = res
-                end
-            end
-        end
-        if firstError then
-            local errFactory = require('promise-async.error')
-            if not errFactory.isInstance(firstError) then
-                firstError = errFactory.new(firstError)
-            end
-            error(firstError)
         end
     end)
 end
@@ -252,7 +229,6 @@ function Promise.new(executor)
     o.state = PENDING
     o.result = nil
     o.queue = {}
-    o.finallyQueue = {}
     o.needHandleRejection = nil
 
     if executor ~= noop then
@@ -282,11 +258,20 @@ end
 ---@param onFinally? fun()
 ---@return Promise
 function Promise:finally(onFinally)
-    table.insert(self.finallyQueue, onFinally)
-    if self.state ~= PENDING then
-        handleQueue(self)
+    local function wrapFinally()
+        if utils.getCallable(onFinally) then
+            ---@diagnostic disable-next-line: need-check-nil
+            onFinally()
+        end
     end
-    return self
+
+    return self:thenCall(function(value)
+        wrapFinally()
+        return value
+    end, function(reason)
+        wrapFinally()
+        error(reason)
+    end)
 end
 
 ---@param value? any
