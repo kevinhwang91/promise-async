@@ -28,7 +28,7 @@ function Promise:catch(onRejected) end
 ---Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected).
 ---The resolved value cannot be modified from the callback.
 ---@param onFinally? fun() The callback to execute when the Promise is settled (fulfilled or rejected).
----@return Promise promise The self promise.
+---@return Promise promise A new Promise.
 function Promise:finally(onFinally) end
 
 ---Creates a new resolved promise for the provided value.
