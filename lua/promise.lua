@@ -34,18 +34,25 @@ local function loadEventLoop()
     return res
 end
 
-Promise.loop = setmetatable({}, {
-    __index = function(_, key)
-        local loop = loadEventLoop()
-        rawset(Promise, 'loop', loop)
-        return loop[key]
-    end,
-    __newindex = function(_, key, value)
-        local loop = loadEventLoop()
-        rawset(Promise, 'loop', loop)
-        Promise.loop[key] = value
-    end
-})
+if vim then
+    -- `require` in Neovim is hacked by its get_runtime API, may throw an error while calling
+    -- `require` in libuv, require at once as a workaround.
+    Promise.loop = require('promise-async.loop')
+else
+    Promise.loop = setmetatable({}, {
+        __index = function(_, key)
+            local loop = loadEventLoop()
+            rawset(Promise, 'loop', loop)
+            return loop[key]
+        end,
+        __newindex = function(_, key, value)
+            local loop = loadEventLoop()
+            rawset(Promise, 'loop', loop)
+            Promise.loop[key] = value
+        end
+    })
+end
+
 
 function Promise:__tostring()
     local state = self.state
