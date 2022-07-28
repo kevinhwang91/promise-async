@@ -9,24 +9,29 @@ Error.__index = Error
 
 local function dump(o, limit)
     local s
-    local fmt = '%s [%s] =%s,'
-    if type(o) == 'table' then
-        if limit > 0 then
-            s = '{'
-            for k, v in pairs(o) do
-                if type(k) ~= 'number' then
-                    k = '"' .. k .. '"'
-                end
-                s = fmt:format(s, k, dump(v, limit - 1))
-            end
-            s = s:sub(1, #s - 2) .. ' }'
-        else
-            s = '{...}'
-        end
-    else
+    if type(o) ~= 'table' then
         s = tostring(o)
+    else
+        local meta = getmetatable(o)
+        if meta and meta.__tostring then
+            s = tostring(o)
+        else
+            if limit > 0 then
+                local fmt = '%s [%s] = %s,'
+                s = '{'
+                for k, v in pairs(o) do
+                    if type(k) ~= 'number' then
+                        k = '"' .. k .. '"'
+                    end
+                    s = fmt:format(s, k, dump(v, limit - 1))
+                end
+                s = s:sub(1, #s - 1) .. ' }'
+            else
+                s = '{...}'
+            end
+        end
     end
-    return ' ' .. s
+    return s
 end
 
 function Error.isInstance(o)
@@ -69,7 +74,7 @@ function Error.new(err)
 end
 
 function Error:__tostring()
-    local errMsg = dump(self.err, 1):match('%s*(.*)')
+    local errMsg = dump(self.err, 1)
     if #self.queue == 0 then
         return errMsg
     end
