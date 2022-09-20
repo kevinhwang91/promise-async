@@ -122,8 +122,8 @@ The environment in `Async.sync` function have been injected some new functions f
 enhancement:
 
 1. `await`: A reference of `Async.wait` function;
-2. `pcall`: Be compatible with LuaJIT and handle error throws by Promise;
-3. `xpcall`: Be compatible with LuaJIT and handle error throws by Promise;
+2. `pcall`: Be compatible with LuaJIT;
+3. `xpcall`: Be compatible with LuaJIT;
 
 `async` in JavaScript return Promise object only with single result, but may carry multiple results
 in Lua. The resolved result of Promise object return by `async` function will be packed into a table

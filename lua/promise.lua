@@ -1,6 +1,8 @@
 local utils = require('promise-async.utils')
 
 local promiseId = {'promise-async'}
+local errFactory = require('promise-async.error')
+local shortSrc = debug.getinfo(1, 'S').short_src
 
 ---@diagnostic disable: undefined-doc-name
 ---@alias PromiseState
@@ -19,6 +21,7 @@ local REJECTED = 3
 ---@field queue table
 ---@field loop PromiseAsyncLoop
 ---@field needHandleRejection? boolean
+---@field err? PromiseAsyncError
 ---@overload fun(executor: PromiseExecutor): Promise
 local Promise = setmetatable({_id = promiseId}, {
     __call = function(self, executor)
@@ -74,11 +77,11 @@ function Promise.isInstance(o, typ)
     return (typ or type(o)) == 'table' and o._id == promiseId
 end
 
----must one time get `thenCall` field from `o`, can't call repeatedly.
+---must get `thenCall` field from `o` at one time, can't call repeatedly.
 ---@param o any
 ---@param typ? type
 ---@return function?
-function Promise.getThenable(o, typ)
+local function getThenable(o, typ)
     local thenCall
     if (typ or type(o)) == 'table' then
         thenCall = o.thenCall
@@ -87,6 +90,20 @@ function Promise.getThenable(o, typ)
         end
     end
     return thenCall
+end
+
+---@param err any
+---@return PromiseAsyncError
+local function buildError(err)
+    local o = errFactory.new(err)
+    local level = 3
+    local ok, value
+    repeat
+        ok, value = errFactory.format(coroutine.running(), level, shortSrc)
+        level = level + 1
+        o:push(value)
+    until not ok
+    return o
 end
 
 local resolvePromise, rejectPromise
@@ -125,6 +142,7 @@ local function handleQueue(promise)
                 if ok then
                     resolvePromise(newPromise, res)
                 else
+                    newPromise.err = buildError(res)
                     rejectPromise(newPromise, res)
                 end
             end
@@ -171,6 +189,7 @@ local function wrapExecutor(promise, executor, self)
         ok, res = pcall(executor, resolve, reject)
     end
     if not ok and not called then
+        promise.err = buildError(res)
         reject(res)
     end
 end
@@ -182,13 +201,12 @@ local function handleRejection(promise)
     Promise.loop.nextIdle(function()
         if promise.needHandleRejection then
             promise.needHandleRejection = nil
-            local errFactory = require('promise-async.error')
-            local reason = promise.result
-            if not errFactory.isInstance(reason) then
-                reason = errFactory.new(reason)
+            local err = promise.err
+            if not err then
+                err = errFactory.new(promise.result)
             end
-            reason:unshift('UnhandledPromiseRejection with the reason:')
-            error(reason)
+            err:unshift('UnhandledPromiseRejection with the reason:')
+            error(err)
         end
     end)
 end
@@ -217,7 +235,7 @@ resolvePromise = function(promise, value)
             rejectPromise(promise, reason)
         end)
     else
-        local thenCall = Promise.getThenable(value, valueType)
+        local thenCall = getThenable(value, valueType)
         if thenCall then
             wrapExecutor(promise, thenCall, value)
         else
@@ -277,7 +295,7 @@ function Promise:finally(onFinally)
         return value
     end, function(reason)
         wrapFinally()
-        error(reason)
+        return Promise.reject(reason)
     end)
 end
 
@@ -289,7 +307,7 @@ function Promise.resolve(value)
         return value
     else
         local o = Promise.new(noop)
-        local thenCall = Promise.getThenable(value, typ)
+        local thenCall = getThenable(value, typ)
         if thenCall then
             wrapExecutor(o, thenCall, value)
         else

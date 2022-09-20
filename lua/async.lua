@@ -1,8 +1,6 @@
 local promise = require('promise')
 local utils = require('promise-async.utils')
 local compat = require('promise-async.compat')
-local errFactory = require('promise-async.error')
-local shortSrc = debug.getinfo(1, 'S').short_src
 
 local asyncId = {'promise-async'}
 
@@ -33,40 +31,20 @@ local function apcall(f, ...)
             return true, ...
         end
         local err = select(1, ...)
-        return false, errFactory.isInstance(err) and err:peek() or err
+        return false, err
     end
 
     return result(compat.pcall(f, ...))
-end
-
-local function axpcall(f, msgh, ...)
-    return compat.xpcall(f, function(err)
-        return msgh(errFactory.isInstance(err) and err:peek() or err)
-    end, ...)
 end
 
 local function injectENV(fn)
     compat.setfenv(fn, setmetatable({
         await = Async.wait,
         pcall = apcall,
-        xpcall = axpcall
+        xpcall = compat.xpcall
     }, {
         __index = compat.getfenv(fn)
     }))
-end
-
-local function buildError(thread, level, err)
-    if not errFactory.isInstance(err) then
-        err = errFactory.new(err)
-        level = level + 1
-    end
-    local ok, value
-    repeat
-        ok, value = errFactory.format(thread, level, shortSrc)
-        level = level + 1
-        err:push(value)
-    until not ok
-    return err
 end
 
 ---Export wait function to someone needs
@@ -117,7 +95,7 @@ function Async.sync(executor)
     end)
 end
 
----Export wait function to someone needs, wait function actually have been injected as `async`
+---Export wait function to someone needs, wait function actually have been injected as `await`
 ---into the executor of async function
 ---@param p Promise|table
 ---@return ...
@@ -125,7 +103,7 @@ function Async.wait(p)
     p = promise.resolve(p)
     local err, res = coroutine.yield(p)
     if err then
-        error(buildError(coroutine.running(), 2, res))
+        error(res, 0)
     elseif hasPacked(res) then
         return compat.unpack(res)
     else
