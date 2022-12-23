@@ -13,9 +13,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: ubuntu-latest, target: nvim, version: v0.7.2 }
+          - { os: ubuntu-latest, target: nvim, version: stable }
           - { os: ubuntu-latest, target: nvim, version: nightly }
-          - { os: macos-latest, target: nvim, version: v0.7.2 }
+          - { os: macos-latest, target: nvim, version: stable }
           - { os: macos-latest, target: nvim, version: nightly }
           - { os: ubuntu-latest, target: lua, version: lua 5.1 }
           - { os: ubuntu-latest, target: lua, version: lua 5.2 }
