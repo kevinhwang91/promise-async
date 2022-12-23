@@ -7,6 +7,7 @@ function M.is51()
     return _G._VERSION:sub(-3) == '5.1' and not jit
 end
 
+---@diagnostic disable: deprecated
 if table.pack then
     M.pack = table.pack
 else
@@ -20,6 +21,7 @@ if table.unpack then
 else
     M.unpack = unpack
 end
+---@diagnostic enable: deprecated
 
 if M.is51() then
     local _pcall, _xpcall = pcall, xpcall

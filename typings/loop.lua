@@ -1,4 +1,4 @@
----@diagnostic disable: unused-local
+---@diagnostic disable: unused-local, missing-return
 
 ---Singleton table, can't be as metatable. Two ways to extend the event loop.
 ---1. Create a new table and implement all methods, assign the new one to `Promise.loop` .

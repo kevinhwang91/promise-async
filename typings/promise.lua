@@ -1,4 +1,4 @@
----@diagnostic disable: unused-local
+---@diagnostic disable: unused-local, missing-return
 
 ---@alias PromiseExecutor fun(resolve: fun(value: any), reject: fun(reason?: any))
 
@@ -15,8 +15,8 @@ local Promise = {}
 function Promise.new(executor) end
 
 ---Attaches callbacks for the resolution and/or rejection of the Promise.
----@param onFulfilled? fun(value: any) The callback to execute when the Promise is resolved.
----@param onRejected? fun(reason: any) The callback to execute when the Promise is rejected.
+---@param onFulfilled? fun(value: any): any The callback to execute when the Promise is resolved.
+---@param onRejected? fun(reason: any): any The callback to execute when the Promise is rejected.
 ---@return Promise promise A Promise for the completion of which ever callback is executed.
 function Promise:thenCall(onFulfilled, onRejected) end
 

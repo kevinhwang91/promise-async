@@ -15,7 +15,8 @@
 	],
 	"diagnostics.disable": [
 		"param-type-mismatch",
-		"assign-type-mismatch"
+		"assign-type-mismatch",
+		"duplicate-set-field"
 	],
 	"runtime.version": "LuaJIT",
 	"type.castNumberToInteger": true,

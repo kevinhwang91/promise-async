@@ -47,7 +47,7 @@ local function injectENV(fn)
     }))
 end
 
----Export wait function to someone needs
+---An async function is a function like the async keyword in JavaScript
 ---@param executor fun()
 ---@return Promise
 function Async.sync(executor)
@@ -95,9 +95,9 @@ function Async.sync(executor)
     end)
 end
 
----Export wait function to someone needs, wait function actually have been injected as `await`
----into the executor of async function
----@param p Promise|table
+---Export wait function to someone needs, wait function actually have injected as `await` into
+---the executor of async function
+---@param p Promise|any
 ---@return ...
 function Async.wait(p)
     p = promise.resolve(p)

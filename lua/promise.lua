@@ -1,5 +1,4 @@
 local utils = require('promise-async.utils')
-
 local promiseId = {'promise-async'}
 local errFactory = require('promise-async.error')
 local shortSrc = debug.getinfo(1, 'S').short_src
@@ -19,10 +18,8 @@ local REJECTED = 3
 ---@field state PromiseState
 ---@field result any
 ---@field queue table
----@field loop PromiseAsyncLoop
 ---@field needHandleRejection? boolean
 ---@field err? PromiseAsyncError
----@overload fun(executor: PromiseExecutor): Promise
 local Promise = setmetatable({_id = promiseId}, {
     __call = function(self, executor)
         return self.new(executor)
@@ -244,8 +241,6 @@ resolvePromise = function(promise, value)
     end
 end
 
----@param executor PromiseExecutor
----@return Promise
 function Promise.new(executor)
     utils.assertType(executor, 'function')
     ---@type Promise
@@ -262,9 +257,6 @@ function Promise.new(executor)
     return o
 end
 
----@param onFulfilled? fun(value: any)
----@param onRejected? fun(reason: any)
----@return Promise
 function Promise:thenCall(onFulfilled, onRejected)
     local o = Promise.new(noop)
     table.insert(self.queue, {o, onFulfilled, onRejected})
@@ -274,14 +266,10 @@ function Promise:thenCall(onFulfilled, onRejected)
     return o
 end
 
----@param onRejected? fun(reason: any)
----@return Promise
 function Promise:catch(onRejected)
     return self:thenCall(nil, onRejected)
 end
 
----@param onFinally? fun()
----@return Promise
 function Promise:finally(onFinally)
     local function wrapFinally()
         if utils.getCallable(onFinally) then
@@ -299,8 +287,6 @@ function Promise:finally(onFinally)
     end)
 end
 
----@param value? any
----@return Promise
 function Promise.resolve(value)
     local typ = type(value)
     if Promise.isInstance(value, typ) then
@@ -318,8 +304,6 @@ function Promise.resolve(value)
     end
 end
 
----@param reason? any
----@return Promise
 function Promise.reject(reason)
     local o = Promise.new(noop)
     o.state = REJECTED
@@ -328,8 +312,6 @@ function Promise.reject(reason)
     return o
 end
 
----@param values table
----@return Promise
 function Promise.all(values)
     utils.assertType(values, 'table')
     return Promise.new(function(resolve, reject)
@@ -353,8 +335,6 @@ function Promise.all(values)
     end)
 end
 
----@param values table
----@return Promise
 function Promise.allSettled(values)
     utils.assertType(values, 'table')
     return Promise.new(function(resolve, reject)
@@ -380,8 +360,6 @@ function Promise.allSettled(values)
     end)
 end
 
----@param values table
----@return Promise
 function Promise.any(values)
     utils.assertType(values, 'table')
     return Promise.new(function(resolve, reject)
@@ -406,8 +384,6 @@ function Promise.any(values)
     end)
 end
 
----@param values table
----@return Promise
 function Promise.race(values)
     utils.assertType(values, 'table')
     return Promise.new(function(resolve, reject)
