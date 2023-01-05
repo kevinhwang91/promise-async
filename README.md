@@ -101,7 +101,7 @@ Summary up the API different from JavaScript.
 
 | JavaScript                                          | Lua                                             |
 | --------------------------------------------------- | ----------------------------------------------- |
-| `new Promise`                                       | `Promise.new`/`Promise`                         |
+| `new Promise`                                       | `Promise:new`/`Promise`                         |
 | `Promise.then`                                      | `Promise:thenCall`, `then` is language keyword  |
 | `Promise.catch`                                     | `Promise:catch`                                 |
 | `Promise.finally`                                   | `Promise:finally`                               |

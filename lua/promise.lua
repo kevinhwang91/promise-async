@@ -22,7 +22,7 @@ local REJECTED = 3
 ---@field err? PromiseAsyncError
 local Promise = setmetatable({_id = promiseId}, {
     __call = function(self, executor)
-        return self.new(executor)
+        return self:new(executor)
     end
 })
 Promise.__index = Promise
@@ -241,11 +241,9 @@ resolvePromise = function(promise, value)
     end
 end
 
-function Promise.new(executor)
+function Promise:new(executor)
     utils.assertType(executor, 'function')
-    ---@type Promise
-    local o = setmetatable({}, Promise)
-
+    local o = self == Promise and setmetatable({}, self) or self
     o.state = PENDING
     o.result = nil
     o.queue = {}
@@ -258,7 +256,7 @@ function Promise.new(executor)
 end
 
 function Promise:thenCall(onFulfilled, onRejected)
-    local o = Promise.new(noop)
+    local o = self.new(Promise, noop)
     table.insert(self.queue, {o, onFulfilled, onRejected})
     if self.state ~= PENDING then
         handleQueue(self)
@@ -292,7 +290,7 @@ function Promise.resolve(value)
     if Promise.isInstance(value, typ) then
         return value
     else
-        local o = Promise.new(noop)
+        local o = Promise:new(noop)
         local thenCall = getThenable(value, typ)
         if thenCall then
             wrapExecutor(o, thenCall, value)
@@ -305,7 +303,7 @@ function Promise.resolve(value)
 end
 
 function Promise.reject(reason)
-    local o = Promise.new(noop)
+    local o = Promise:new(noop)
     o.state = REJECTED
     o.result = reason
     handleRejection(o)
@@ -314,7 +312,7 @@ end
 
 function Promise.all(values)
     utils.assertType(values, 'table')
-    return Promise.new(function(resolve, reject)
+    return Promise:new(function(resolve, reject)
         local res = {}
         local cnt = 0
         for k, v in pairs(values) do
@@ -337,7 +335,7 @@ end
 
 function Promise.allSettled(values)
     utils.assertType(values, 'table')
-    return Promise.new(function(resolve, reject)
+    return Promise:new(function(resolve, reject)
         local res = {}
         local cnt = 0
         local _ = reject
@@ -362,7 +360,7 @@ end
 
 function Promise.any(values)
     utils.assertType(values, 'table')
-    return Promise.new(function(resolve, reject)
+    return Promise:new(function(resolve, reject)
         local cnt = 0
         local function rejectAggregateError()
             if cnt == 0 then
@@ -386,7 +384,7 @@ end
 
 function Promise.race(values)
     utils.assertType(values, 'table')
-    return Promise.new(function(resolve, reject)
+    return Promise:new(function(resolve, reject)
         for _, p in pairs(values) do
             Promise.resolve(p):thenCall(function(value)
                 resolve(value)

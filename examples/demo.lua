@@ -15,7 +15,7 @@ local function setTimeout(callback, ms)
 end
 
 local function defuse(ms)
-    return promise.new(function(resolve, reject)
+    return promise:new(function(resolve, reject)
         setTimeout(function()
             resolve(ms)
         end, ms)
