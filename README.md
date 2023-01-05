@@ -6,7 +6,8 @@
 The goal of promise-async is to port [Promise][promise] & [Async][async] from JavaScript to Lua.
 
 > A value returned by async function in JavaScript is actually a Promise Object. It's incomplete and
-> inflexible for using an async function wrapped by bare coroutine without Promise.
+> inflexible for using an async function wrapped by bare coroutine without Promise in almost Lua
+> implementation.
 
 - [Features](#features)
 - [Demonstration](#demonstration)
@@ -45,11 +46,11 @@ The goal of promise-async is to port [Promise][promise] & [Async][async] from Ja
 
 #### demo.lua
 
-<https://github.com/kevinhwang91/promise-async/blob/8177d6e6ab8dae4ca5f26caf3bdc23f632595d40/examples/demo.lua#L17-L82>
+<https://github.com/kevinhwang91/promise-async/blob/3f6dcb2f0f546e8be7e170785f07f71ef6afab34/examples/demo.lua#L17-L82>
 
 #### demo.js
 
-<https://github.com/kevinhwang91/promise-async/blob/8177d6e6ab8dae4ca5f26caf3bdc23f632595d40/examples/demo.js#L1-L58>
+<https://github.com/kevinhwang91/promise-async/blob/3f6dcb2f0f546e8be7e170785f07f71ef6afab34/examples/demo.js#L1-L58>
 
 ## Quickstart
 
