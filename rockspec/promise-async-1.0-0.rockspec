@@ -1,7 +1,8 @@
 package = 'promise-async'
-version = 'scm-0'
+version = '1.0-0'
 source = {
-    url = 'git+https://github.com/kevinhwang91/promise-async.git'
+    url = 'git+https://github.com/kevinhwang91/promise-async.git',
+    tag = 'v1.0.0'
 }
 description = {
     summary = 'Promise & Async in Lua',
