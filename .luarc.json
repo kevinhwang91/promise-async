@@ -20,5 +20,6 @@
 	],
 	"runtime.version": "LuaJIT",
 	"type.castNumberToInteger": true,
-	"type.weakUnionCheck": true
+	"type.weakUnionCheck": true,
+	"workspace.ignoreDir": ["build"]
 }
