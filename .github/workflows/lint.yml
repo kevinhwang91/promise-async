@@ -1,6 +1,7 @@
 name: Lint
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -22,6 +23,8 @@ jobs:
           gh release download -R sumneko/lua-language-server -p '*-linux-x64.tar.gz' -D lua-language-server
           tar xzf lua-language-server/* -C lua-language-server
           echo "${PWD}/lua-language-server/bin" >> $GITHUB_PATH
+          export PATH="${PWD}/lua-language-server/bin:${PATH}"
+          lua-language-server --version
 
       - name: Run Lint
         run: make lint
