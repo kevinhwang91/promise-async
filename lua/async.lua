@@ -5,7 +5,6 @@ local compat = require('promise-async.compat')
 local asyncId = {'promise-async'}
 
 ---@class Async
----@overload fun(executor: fun()): Promise
 local Async = setmetatable({_id = asyncId}, {
     __call = function(self, executor)
         return self.sync(executor)
@@ -47,9 +46,6 @@ local function injectENV(fn)
     }))
 end
 
----An async function is a function like the async keyword in JavaScript
----@param executor fun()
----@return Promise
 function Async.sync(executor)
     local typ = type(executor)
     local isCallable, fn = utils.getCallable(executor, typ)

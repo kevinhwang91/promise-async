@@ -3,12 +3,10 @@ local promiseId = {'promise-async'}
 local errFactory = require('promise-async.error')
 local shortSrc = debug.getinfo(1, 'S').short_src
 
----@diagnostic disable: undefined-doc-name
 ---@alias PromiseState
----| PENDING # 1
----| FULFILLED # 2
----| REJECTED # 3
----@diagnostic enable: undefined-doc-name
+---| 1 #PENDING
+---| 2 #FULFILLED
+---| 3 #REJECTED
 local PENDING = 1
 local FULFILLED = 2
 local REJECTED = 3
