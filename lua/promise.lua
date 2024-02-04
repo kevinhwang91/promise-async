@@ -133,12 +133,18 @@ local function handleQueue(promise)
                 end
             end
             if func then
-                local ok, res = pcall(func, result)
+                local err = nil
+                local ok, res = xpcall(function()
+                    return func(result)
+                end, function(errmsg)
+                    err = errmsg .. '\n' .. debug.traceback()
+                end)
                 if ok then
                     resolvePromise(newPromise, res)
                 else
-                    newPromise.err = buildError(res)
-                    rejectPromise(newPromise, res)
+                    assert(err ~= nil, "invalid xpcall usage")
+                    newPromise.err = buildError(err)
+                    rejectPromise(newPromise, err)
                 end
             end
         end
@@ -177,15 +183,21 @@ local function wrapExecutor(promise, executor, self)
         called = true
     end
 
-    local ok, res
-    if self then
-        ok, res = pcall(executor, self, resolve, reject)
-    else
-        ok, res = pcall(executor, resolve, reject)
-    end
+    local ok, res, err
+    ok, res = xpcall(function()
+        if self then
+            ---@diagnostic disable-next-line: redundant-parameter, param-type-mismatch
+            return executor(self, resolve, reject)
+        else
+            return executor(resolve, reject)
+        end
+    end, function(errmsg)
+        err = errmsg .. '\n' .. debug.traceback()
+    end)
     if not ok and not called then
-        promise.err = buildError(res)
-        reject(res)
+        assert(err ~= nil, "invalid xpcall usage")
+        promise.err = buildError(err)
+        reject(err)
     end
 end
 
