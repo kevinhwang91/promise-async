@@ -91,14 +91,22 @@ end
 ---@return PromiseAsyncError
 local function buildError(err)
     local o = errFactory.new(err)
-    local level = 3
-    local ok, value
+    local level = 4
+    local value
+    local thread = coroutine.running()
     repeat
-        ok, value = errFactory.format(coroutine.running(), level, shortSrc)
+        value = errFactory.format(thread, level, shortSrc)
         level = level + 1
         o:push(value)
-    until not ok
+    until not value
+    table.remove(o.queue)
     return o
+end
+
+---@param errmsg any
+---@return PromiseAsyncError | any
+local function xpcallMessageWrapper(errmsg)
+    return type(errmsg) == 'string' and buildError(errmsg) or errmsg
 end
 
 local resolvePromise, rejectPromise
@@ -133,11 +141,13 @@ local function handleQueue(promise)
                 end
             end
             if func then
-                local ok, res = pcall(func, result)
+                local ok, res = xpcall(function()
+                    return func(result)
+                end, xpcallMessageWrapper)
                 if ok then
                     resolvePromise(newPromise, res)
                 else
-                    newPromise.err = buildError(res)
+                    newPromise.err = res
                     rejectPromise(newPromise, res)
                 end
             end
@@ -177,14 +187,16 @@ local function wrapExecutor(promise, executor, self)
         called = true
     end
 
-    local ok, res
-    if self then
-        ok, res = pcall(executor, self, resolve, reject)
-    else
-        ok, res = pcall(executor, resolve, reject)
-    end
+    local ok, res = xpcall(function()
+        if self then
+            ---@diagnostic disable-next-line: redundant-parameter, param-type-mismatch
+            return executor(self, resolve, reject)
+        else
+            return executor(resolve, reject)
+        end
+    end, xpcallMessageWrapper)
     if not ok and not called then
-        promise.err = buildError(res)
+        promise.err = res
         reject(res)
     end
 end

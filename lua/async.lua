@@ -47,7 +47,7 @@ function Async.sync(executor)
         local function afterResume(status, ...)
             if not status then
                 local reason = select(1, ...)
-                reject(reason)
+                reject(debug.traceback(co, reason))
                 return
             elseif coroutine.status(co) == 'dead' then
                 local value

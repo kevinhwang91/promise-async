@@ -41,15 +41,14 @@ end
 ---@param thread? thread
 ---@param level number
 ---@param skipShortSrc? string
----@return boolean, string|nil
+---@return string?
 function Error.format(thread, level, skipShortSrc)
-    local ok = false
     local res
     local dInfo = thread and debug.getinfo(thread, level, 'nSl') or debug.getinfo(level, 'nSl')
     if dInfo then
         local name, shortSrc, currentline = dInfo.name, dInfo.short_src, dInfo.currentline
         if skipShortSrc == shortSrc then
-            return true, nil
+            return
         end
         local detail
         if not name or name == '' then
@@ -57,10 +56,9 @@ function Error.format(thread, level, skipShortSrc)
         else
             detail = ([[in function '%s']]):format(name)
         end
-        ok = true
         res = ('        %s:%d: %s'):format(shortSrc, currentline, detail)
     end
-    return ok, res
+    return res
 end
 
 ---@param err any
