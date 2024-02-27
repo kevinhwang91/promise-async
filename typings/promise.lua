@@ -21,7 +21,7 @@ function Promise:new(executor) end
 function Promise:thenCall(onFulfilled, onRejected) end
 
 ---Attaches a callback for only the rejection of the Promise.
----@param onRejected? fun(reason: any) The callback to execute when the Promise is rejected.
+---@param onRejected? fun(reason: any): any The callback to execute when the Promise is rejected.
 ---@return Promise promise A Promise for the completion of the callback.
 function Promise:catch(onRejected) end
 
