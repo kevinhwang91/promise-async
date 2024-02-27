@@ -24,22 +24,10 @@ local function hasPacked(o)
     return type(o) == 'table' and o._id == packedId
 end
 
-local function apcall(f, ...)
-    local function result(ok, ...)
-        if ok then
-            return true, ...
-        end
-        local err = select(1, ...)
-        return false, err
-    end
-
-    return result(compat.pcall(f, ...))
-end
-
 local function injectENV(fn)
     compat.setfenv(fn, setmetatable({
         await = Async.wait,
-        pcall = apcall,
+        pcall = compat.pcall,
         xpcall = compat.xpcall
     }, {
         __index = compat.getfenv(fn)
