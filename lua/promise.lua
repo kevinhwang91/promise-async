@@ -138,7 +138,9 @@ local function handleQueue(promise)
                 local ok, res = xpcall(function()
                     return func(result)
                 end, function(errmsg)
-                    newPromise.err = type(errmsg) == 'string' and buildError(errmsg) or errmsg
+                    if type(errmsg) == 'string' then
+                        newPromise.err = buildError(errmsg)
+                    end
                     return errmsg
                 end)
                 if ok then
@@ -191,7 +193,9 @@ local function wrapExecutor(promise, executor, self)
             return executor(resolve, reject)
         end
     end, function(errmsg)
-        promise.err = type(errmsg) == 'string' and buildError(errmsg) or errmsg
+        if type(errmsg) == 'string' then
+            promise.err = buildError(errmsg)
+        end
         return errmsg
     end)
     if not ok and not called then
