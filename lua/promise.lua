@@ -103,12 +103,6 @@ local function buildError(err)
     return o
 end
 
----@param errmsg any
----@return PromiseAsyncError | any
-local function xpcallMessageWrapper(errmsg)
-    return type(errmsg) == 'string' and buildError(errmsg) or errmsg
-end
-
 local resolvePromise, rejectPromise
 
 ---@param promise Promise
@@ -143,11 +137,13 @@ local function handleQueue(promise)
             if func then
                 local ok, res = xpcall(function()
                     return func(result)
-                end, xpcallMessageWrapper)
+                end, function(errmsg)
+                    newPromise.err = type(errmsg) == 'string' and buildError(errmsg) or errmsg
+                    return errmsg
+                end)
                 if ok then
                     resolvePromise(newPromise, res)
                 else
-                    newPromise.err = res
                     rejectPromise(newPromise, res)
                 end
             end
@@ -194,9 +190,11 @@ local function wrapExecutor(promise, executor, self)
         else
             return executor(resolve, reject)
         end
-    end, xpcallMessageWrapper)
+    end, function(errmsg)
+        promise.err = type(errmsg) == 'string' and buildError(errmsg) or errmsg
+        return errmsg
+    end)
     if not ok and not called then
-        promise.err = res
         reject(res)
     end
 end
