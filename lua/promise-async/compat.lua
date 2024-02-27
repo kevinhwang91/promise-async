@@ -64,10 +64,7 @@ if M.is51() then
     M.xpcall = function(f, msgh, ...)
         local thread = coroutine.running()
         if not thread then
-            local args, n = {...}, select('#', ...)
-            return _xpcall(function()
-                return f(unpack(args, 1, n))
-            end, msgh)
+            return _xpcall(f, msgh, ...)
         end
         return xpcallCatch(msgh, doPcall(thread, f, ...))
     end
