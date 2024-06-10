@@ -46,8 +46,8 @@ jobs:
         name: Install Neovim on Macos
         run: |
           cd
-          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-macos.tar.gz
-          tar xzf nvim-macos.tar.gz
+          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-macos-x86_64.tar.gz
+          tar xzf nvim-macos-x86_64.tar.gz
           echo "${PWD}/nvim-macos/bin" >> $GITHUB_PATH
           export PATH="${PWD}/nvim-macos/bin:${PATH}"
           nvim -v
