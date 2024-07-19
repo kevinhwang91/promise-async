@@ -73,13 +73,8 @@ end
 if vim and type(vim.schedule) == 'function' then
     EventLoop.callWrapper = vim.schedule
 else
-    function EventLoop.callWrapper(fn)
-        local ok, res = pcall(fn)
-        if not ok then
-            -- luv can't handle object with __tostring filed
-            error(tostring(res))
-        end
-    end
+    -- https://github.com/luvit/luv/pull/665 can throw the non-string error since 1.46 version
+    function EventLoop.callWrapper(fn) fn() end
 end
 
 return EventLoop
