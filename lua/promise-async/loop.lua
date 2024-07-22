@@ -37,6 +37,8 @@ local function runTick()
     else
         EventLoop.tickStarted = false
     end
+    -- luv loop has invoked close method if the timer has finished
+    -- EventLoop.tick:close()
 end
 
 function EventLoop.nextTick(callback)
@@ -53,11 +55,9 @@ local function runIdle()
     for _, cb in ipairs(callbacks) do
         EventLoop.callWrapper(cb)
     end
-    if #EventLoop.idleCallbacks > 0 then
-        EventLoop.idle:start(runIdle)
-    else
-        EventLoop.idle:stop()
+    if #EventLoop.idleCallbacks == 0 then
         EventLoop.idleStarted = false
+        EventLoop.idle:stop()
     end
 end
 
