@@ -69,6 +69,23 @@ describe('EventLoop for Promise.', function()
         assert.True(wait())
     end)
 
+    it('call `nextIdle` in `nextIdle` event', function()
+        local onIdle = spy.new(function() end)
+        local onNextIdle = spy.new(function() end)
+        loop.nextIdle(function()
+            onIdle()
+            loop.nextIdle(function()
+                onNextIdle()
+                assert.spy(onNextIdle).was_called()
+                done()
+            end)
+            assert.spy(onIdle).was_called()
+            assert.spy(onNextIdle).was_not_called()
+        end)
+
+        assert.True(wait())
+    end)
+
     it('override callWrapper method', function()
         local rawCallWrapper = loop.callWrapper
         local callback = function() end
