@@ -18,12 +18,7 @@ return function(options)
         if ok then
             return
         end
-        -- Some tests never handle the rejected promises, We should ignore them.
-        local msg = tostring(res)
-        if msg:match('^UnhandledPromiseRejection') then
-            return
-        end
-        table.insert(promiseUnhandledError, msg)
+        table.insert(promiseUnhandledError, tostring(res))
     end
     return handler
 end

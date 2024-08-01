@@ -1,5 +1,12 @@
 local M = {}
 local promise = require('promise')
+local reject = promise.reject
+
+promise.reject = function (reason)
+    local p = reject(reason)
+    p.needHandleRejection = nil
+    return p
+end
 
 M.setTimeout = promise.loop.setTimeout
 
