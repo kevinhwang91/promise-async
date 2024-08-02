@@ -20,7 +20,11 @@ Basic['`string`'] = function()
 end
 
 Basic['a metatable'] = function()
-    return setmetatable({}, {})
+    return setmetatable({}, {
+        __tostring = function()
+            return '{}'
+        end
+    })
 end
 
 Basic['a thread'] = function()
