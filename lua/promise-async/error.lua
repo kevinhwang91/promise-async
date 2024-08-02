@@ -8,63 +8,86 @@ local Error = {_id = errorId}
 Error.__index = Error
 
 local function dump(o, limit)
-    local s
-    if type(o) ~= 'table' then
-        s = tostring(o)
-    else
-        local meta = getmetatable(o)
-        if meta and meta.__tostring then
-            s = tostring(o)
-        else
-            if limit > 0 then
-                local fmt = '%s [%s] = %s,'
-                s = '{'
-                for k, v in pairs(o) do
-                    if type(k) ~= 'number' then
-                        k = '"' .. k .. '"'
-                    end
-                    s = fmt:format(s, k, dump(v, limit - 1))
-                end
-                s = s:sub(1, #s - 1) .. ' }'
-            else
-                s = '{...}'
-            end
-        end
+    local typ = type(o)
+    if typ == 'string' then
+        return o
+    elseif typ ~= 'table' then
+        return tostring(o)
     end
-    return s
+    local meta = getmetatable(o)
+    if meta and meta.__tostring then
+        return tostring(o)
+    end
+    if limit > 0 then
+        local fmt = '%s [%s] = %s,'
+        local s = '{'
+        for k, v in pairs(o) do
+            if type(k) ~= 'number' then
+                k = '"' .. k .. '"'
+            end
+            s = fmt:format(s, k, dump(v, limit - 1))
+        end
+        return #s == 1 and '{}' or s:sub(1, #s - 1) .. ' }'
+    else
+        return '{...}'
+    end
 end
 
 function Error.isInstance(o)
     return type(o) == 'table' and o._id == errorId
 end
 
----@param thread? thread
----@param level number
----@param skipShortSrc? string
----@return string?
-function Error.format(thread, level, skipShortSrc)
-    local res
-    local dInfo = thread and debug.getinfo(thread, level, 'nSl') or debug.getinfo(level, 'nSl')
-    if dInfo then
-        local name, shortSrc, currentline = dInfo.name, dInfo.short_src, dInfo.currentline
-        if skipShortSrc == shortSrc then
-            return
-        end
-        local detail
-        if not name or name == '' then
-            detail = ('in function <Anonymous:%d>'):format(dInfo.linedefined)
-        else
-            detail = ([[in function '%s']]):format(name)
-        end
-        res = ('        %s:%d: %s'):format(shortSrc, currentline, detail)
+local what = _G._VERSION:sub(-3) == '5.1' and 'Snl' or 'Slnt'
+
+local function outputLevelInfo(dInfo)
+    local seg = {('\t%s:'):format(dInfo.short_src)}
+    if dInfo.currentline > 0 then
+        table.insert(seg, ('%d:'):format(dInfo.currentline))
     end
-    return res
+    -- TODO
+    -- lua 5.3 and 5.4 will look up global function and module function before checking 'namewhat'.
+    -- And insert "in namewhat name" if not found
+    if dInfo.namewhat ~= '' then
+        table.insert(seg, (" in function '%s'"):format(dInfo.name))
+    else
+        if dInfo.what == 'm' then
+            table.insert(seg, ' in main chunk')
+        elseif dInfo.what ~= 'C' then
+            table.insert(seg, (' in function <%s:%d>'):format(dInfo.short_src, dInfo.linedefined))
+        else
+            table.insert(seg, '?')
+        end
+    end
+    if dInfo.istailcall then
+        table.insert(seg, '\n\t(...tail calls...)')
+    end
+    return table.concat(seg, '')
+end
+
+---@param startLevel? number
+---@param skipShortSrc? string
+---@return PromiseAsyncError
+function Error:buildStack(startLevel, skipShortSrc)
+    local level = startLevel or 1
+    local value
+    local thread = coroutine.running()
+    while true do
+        local dInfo = thread and debug.getinfo(thread, level, what) or debug.getinfo(level, what)
+        if not dInfo or skipShortSrc == dInfo.short_src then
+            break
+        end
+        value = outputLevelInfo(dInfo)
+        level = level + 1
+        self:push(value)
+    end
+    table.remove(self.queue)
+    return self
 end
 
 ---@param err any
 ---@return PromiseAsyncError
-function Error.new(err)
-    local o = setmetatable({}, Error)
+function Error:new(err)
+    local o = setmetatable({}, self)
     o.err = err
     o.queue = {}
     o.index = 0

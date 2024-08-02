@@ -87,22 +87,6 @@ local function getThenable(o, typ)
     return thenCall
 end
 
----@param err any
----@return PromiseAsyncError
-local function buildError(err)
-    local o = errFactory.new(err)
-    local level = 4
-    local value
-    local thread = coroutine.running()
-    repeat
-        value = errFactory.format(thread, level, shortSrc)
-        level = level + 1
-        o:push(value)
-    until not value
-    table.remove(o.queue)
-    return o
-end
-
 local resolvePromise, rejectPromise
 
 ---@param promise Promise
@@ -139,7 +123,9 @@ local function handleQueue(promise)
                     return func(result)
                 end, function(errmsg)
                     if type(errmsg) == 'string' then
-                        newPromise.err = buildError(errmsg)
+                        newPromise.err = errFactory:new(errmsg)
+                            :buildStack(3, shortSrc)
+                        return tostring(newPromise.err)
                     end
                     return errmsg
                 end)
@@ -194,7 +180,9 @@ local function wrapExecutor(promise, executor, self)
         end
     end, function(errmsg)
         if type(errmsg) == 'string' then
-            promise.err = buildError(errmsg)
+            promise.err = errFactory:new(errmsg)
+                :buildStack(3, shortSrc)
+            return tostring(promise.err)
         end
         return errmsg
     end)
@@ -212,7 +200,7 @@ local function handleRejection(promise)
             promise.needHandleRejection = nil
             local err = promise.err
             if not err then
-                err = errFactory.new(promise.result)
+                err = errFactory:new(promise.result)
             end
             err:unshift('UnhandledPromiseRejection with the reason:')
             error(err)
