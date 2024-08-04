@@ -46,10 +46,10 @@ jobs:
         name: Install Neovim on Macos
         run: |
           cd
-          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-macos-x86_64.tar.gz
-          tar xzf nvim-macos-x86_64.tar.gz
-          echo "${PWD}/nvim-macos-x86_64/bin" >> $GITHUB_PATH
-          export PATH="${PWD}/nvim-macos-x86_64/bin:${PATH}"
+          curl -LO https://github.com/neovim/neovim/releases/download/${{ matrix.version }}/nvim-macos-arm64.tar.gz
+          tar xzf nvim-macos-arm64.tar.gz
+          echo "${PWD}/nvim-macos-arm64/bin" >> $GITHUB_PATH
+          export PATH="${PWD}/nvim-macos-arm64/bin:${PATH}"
           nvim -v
 
       - name: Run Test
