@@ -123,8 +123,9 @@ local function handleQueue(promise)
                     return func(result)
                 end, function(errmsg)
                     if type(errmsg) == 'string' then
+                        -- pop xpcall stack
                         newPromise.err = errFactory:new(errmsg)
-                            :buildStack(3, shortSrc)
+                            :buildStack(3, shortSrc, true)
                         return tostring(newPromise.err)
                     end
                     return errmsg
@@ -180,8 +181,9 @@ local function wrapExecutor(promise, executor, self)
         end
     end, function(errmsg)
         if type(errmsg) == 'string' then
+            -- pop xpcall stack
             promise.err = errFactory:new(errmsg)
-                :buildStack(3, shortSrc)
+                :buildStack(3, shortSrc, true)
             return tostring(promise.err)
         end
         return errmsg

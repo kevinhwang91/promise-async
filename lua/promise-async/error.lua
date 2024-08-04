@@ -66,8 +66,9 @@ end
 
 ---@param startLevel? number
 ---@param skipShortSrc? string
+---@param doPop? boolean
 ---@return PromiseAsyncError
-function Error:buildStack(startLevel, skipShortSrc)
+function Error:buildStack(startLevel, skipShortSrc, doPop)
     local level = startLevel or 1
     local value
     local thread = coroutine.running()
@@ -80,7 +81,9 @@ function Error:buildStack(startLevel, skipShortSrc)
         level = level + 1
         self:push(value)
     end
-    table.remove(self.queue)
+    if doPop then
+        self:pop()
+    end
     return self
 end
 
@@ -128,6 +131,11 @@ function Error:push(value)
         table.insert(self.queue, value)
     end
     return #self.queue
+end
+
+---@return string
+function Error:pop()
+    return table.remove(self.queue)
 end
 
 ---@return any
