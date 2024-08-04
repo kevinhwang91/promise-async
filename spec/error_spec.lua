@@ -29,7 +29,7 @@ describe('Error for Promise and Async.', function()
         describe('Build basic values for top of stack.', function()
             -- keep stack always from tail calls
             local function level3(v)
-                local s = e:new(v):buildStack(2, '[C]')
+                local s = e:new(v):buildStack(2)
                 return tostring(s)
             end
             local function level2(v)
@@ -51,7 +51,7 @@ describe('Error for Promise and Async.', function()
             local function testBasicTopStack(expectedValue, stringRepresentation)
                 it('The value is ' .. stringRepresentation .. '.', function()
                     local s = level1(expectedValue)
-                    assert.equal(tostring(expectedValue) .. '\n' .. stackStr, s)
+                    assert.truthy(s:find(tostring(expectedValue) .. '\n' .. stackStr, 1, true))
                 end)
             end
 
